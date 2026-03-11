@@ -1,0 +1,21 @@
+{
+    "title": "Velvet & Vine Grand Wedding",
+    "date": "June 21, 2026",
+    "location": "Lake Como, Italy",
+    "schedule": [
+        {
+            "time": "3:00 PM",
+            "event": "Guest Arrival"
+        },
+
+        {
+            "time": "4:00 PM",
+            "event": "Wedding Ceremony"
+        },
+
+        {
+            "time":"6:00 PM",
+            "event": "Reception Dinner"
+        }
+    ]
+}
