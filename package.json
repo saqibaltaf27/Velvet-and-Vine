@@ -1,10 +1,13 @@
 {
   "name": "velvet-and-vine",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Automated event portal deployment pipeline",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx @11ty/eleventy",
+    "lint": "eslint src/**/*.js",
+    "optimize": "node scripts/optimize-image.js",
+    "smoke-test": "node scripts/smoke-test.js",
+    "start": "npx @11ty/eleventy --serve"
   },
   "keywords": [],
   "author": "",
