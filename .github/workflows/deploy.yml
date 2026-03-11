@@ -20,10 +20,25 @@ jobs:
         node-version: 20
 
     - name: Install Dependencies
-      run: npm install
+      run: npm ci  # Using ci for cleaner installs
+
+    - name: Fix Permissions
+      run: |
+        # Make node_modules binaries executable
+        chmod +x node_modules/.bin/eslint || true
+        chmod +x node_modules/.bin/*
+        # Also fix any script files
+        chmod +x scripts/*.js || true
+
+    - name: Debug - Check Permissions
+      run: |
+        ls -la node_modules/.bin/eslint
+        which eslint || echo "eslint not in PATH"
+        npx eslint --version || echo "npx eslint check"
 
     - name: Lint Code
-      run: npm run lint
+      run: npx eslint src/**/*.js  # Use npx to run eslint
+      # Alternative: npm run lint (if the permission is fixed)
 
     - name: Optimize Images
       run: npm run optimize
