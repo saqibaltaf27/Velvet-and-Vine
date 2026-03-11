@@ -6,6 +6,12 @@ on:
       - main
       - staging
 
+# Add permissions for GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,27 +24,19 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
+        cache: 'npm'
 
     - name: Install Dependencies
-      run: npm ci  # Using ci for cleaner installs
+      run: |
+        npm ci || npm install
 
     - name: Fix Permissions
       run: |
-        # Make node_modules binaries executable
         chmod +x node_modules/.bin/eslint || true
-        chmod +x node_modules/.bin/*
-        # Also fix any script files
         chmod +x scripts/*.js || true
 
-    - name: Debug - Check Permissions
-      run: |
-        ls -la node_modules/.bin/eslint
-        which eslint || echo "eslint not in PATH"
-        npx eslint --version || echo "npx eslint check"
-
     - name: Lint Code
-      run: npx eslint src/**/*.js  # Use npx to run eslint
-      # Alternative: npm run lint (if the permission is fixed)
+      run: npm run lint
 
     - name: Optimize Images
       run: npm run optimize
@@ -49,18 +47,35 @@ jobs:
     - name: Smoke Test
       run: npm run smoke-test
 
+    - name: Debug Build Output
+      run: |
+        echo "=== Build Directory Contents ==="
+        ls -la _site/
+        echo "=== Total Files ==="
+        find _site -type f | wc -l
+
     - name: Deploy to Staging
       if: github.ref == 'refs/heads/staging'
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4  # Updated to v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./_site
         publish_branch: gh-pages-staging
+        force_orphan: true
+        enable_jekyll: false
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Deploy staging: ${{ github.event.head_commit.message }}'
 
     - name: Deploy to Production
       if: github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4  # Updated to v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./_site
         publish_branch: gh-pages
+        force_orphan: true
+        enable_jekyll: false
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Deploy production: ${{ github.event.head_commit.message }}'
