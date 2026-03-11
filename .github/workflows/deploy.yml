@@ -18,33 +18,42 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
+        cache: 'npm'
 
     - name: Install Dependencies
-      run: npm ci  # Using ci for cleaner installs
+      run: npm ci
 
     - name: Fix Permissions
       run: |
-        # Make node_modules binaries executable
         chmod +x node_modules/.bin/eslint || true
-        chmod +x node_modules/.bin/*
-        # Also fix any script files
         chmod +x scripts/*.js || true
 
-    - name: Debug - Check Permissions
+    - name: Debug - Check Files
       run: |
-        ls -la node_modules/.bin/eslint
-        which eslint || echo "eslint not in PATH"
-        npx eslint --version || echo "npx eslint check"
+        echo "=== Package.json Scripts ==="
+        cat package.json | grep -A 10 "scripts"
+        echo "=== ESLint Version ==="
+        npx eslint --version
+        echo "=== Source Files ==="
+        ls -la src/
+        echo "=== Scripts Files ==="
+        ls -la scripts/
 
     - name: Lint Code
-      run: npx eslint src/**/*.js  # Use npx to run eslint
-      # Alternative: npm run lint (if the permission is fixed)
+      run: npm run lint
 
     - name: Optimize Images
       run: npm run optimize
 
     - name: Build Site
       run: npm run build
+
+    - name: Debug - Check Build Output
+      run: |
+        echo "=== Build Output ==="
+        ls -la _site/ || echo "Build directory not found"
+        echo "=== Site Contents ==="
+        find _site -type f -name "*.html" | head -10 || echo "No HTML files found"
 
     - name: Smoke Test
       run: npm run smoke-test
@@ -56,6 +65,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./_site
         publish_branch: gh-pages-staging
+        force_orphan: true
 
     - name: Deploy to Production
       if: github.ref == 'refs/heads/main'
@@ -64,3 +74,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./_site
         publish_branch: gh-pages
+        force_orphan: true
